@@ -38,14 +38,23 @@ class EnBook(Types.Notebook):
         # for nmd in noteStore.findNotesMetadata(noteFilter, 0, 10, noteSpec).notes:
         # note = noteStore.getNote(nmd.guid, True, False, False, False)
 
-    def __iter__(self):
+    def _init_notes(self):
         if self._notes is None:
-            self._notes = []
+            # self._notes = []
+            self._notes = {}
             for nmd in self._client.note_store.findNotesMetadata(self._note_filter, 0, 2048, self._note_spec).notes:
                 nmd = EnNote.initialize(nmd)
-                self._notes.append(nmd)
+                # self._notes.append(nmd)
+                self._notes[nmd.guid] = nmd
 
+    def get_note(self, guid):
+        self._init_notes()
+        return self._notes.get(guid)
+
+    def __iter__(self):
+        self._init_notes()
         return iter(self._notes)
+
 
 class EnNote(Types.Note):
 

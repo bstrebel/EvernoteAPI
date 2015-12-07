@@ -21,12 +21,16 @@ class EnClient(EvernoteClient):
         EnClient._client = client
 
     def __init__(self, **kwargs):
+
+        EvernoteClient.__init__(self, **kwargs)
+
         self._user_store = None
         self._note_store = None
         self._notebooks = None
         self._stacks = None
         self._guids = None
-        EvernoteClient.__init__(self, **kwargs)
+
+        EnClient.set_client(self)
 
     def _initialize(self):
         from enapi import EnBook
@@ -53,11 +57,33 @@ class EnClient(EvernoteClient):
 
     @property
     def notebooks(self):
-        if self._notebooks is None:
+        if not self._notebooks:
             self._initialize()
         return self._notebooks
 
     def notebook(self, name):
-        if self._notebooks is None:
+        if not self._notebooks:
             self._initialize()
         return self._notebooks.get(name, None)
+
+    def get_note(self, guid, book):
+        from enapi import EnNote
+        if book:
+            return self.notebook(book).get_note(guid)
+        else:
+            filter = self.note_store.NoteFilter(guid=guid)
+            spec = self.note_store.NotesMetadataResultSpec(includeTitle=True,
+                                                                includeContentLength=True,
+                                                                includeCreated=True,
+                                                                includeUpdated=True,
+                                                                includeDeleted=True,
+                                                                includeTagGuids=True,
+                                                                includeAttributes=True)
+
+            nmds = self.note_store.findNotesMetadata(filter, 0, 1, spec).notes
+            nmd = EnNote.initialize(nmds[0])
+            return nmd
+
+    def delete_note(self,guid):
+        self.note_store.deleteNote(guid)
+
