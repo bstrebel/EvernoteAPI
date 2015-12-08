@@ -8,12 +8,12 @@ PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 from .client import EnClient
 from .notes import EnBook, EnNote, EnStack
-from .sync import EnClientSync
+#from .sync import EnClientSync
 
 __all__ = [
 
+#   'EnClientSync',
     'EnClient',
-    'EnClientSync',
     'EnBook',
     'EnNote',
     'EnStack'

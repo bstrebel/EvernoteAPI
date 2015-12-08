@@ -21,7 +21,6 @@ class EnClient(EvernoteClient):
         EnClient._client = client
 
     def __init__(self, **kwargs):
-
         EvernoteClient.__init__(self, **kwargs)
 
         self._user_store = None
@@ -32,7 +31,7 @@ class EnClient(EvernoteClient):
 
         EnClient.set_client(self)
 
-    def _initialize(self):
+    def __initialize(self):
         from enapi import EnBook
         self._notebooks = {}
         self._stacks = {}
@@ -58,32 +57,42 @@ class EnClient(EvernoteClient):
     @property
     def notebooks(self):
         if not self._notebooks:
-            self._initialize()
+            self.__initialize()
         return self._notebooks
 
     def notebook(self, name):
         if not self._notebooks:
-            self._initialize()
-        return self._notebooks.get(name, None)
+            self.__initialize()
+        return self._notebooks.get(name)
 
-    def get_note(self, guid, book):
+    def get_note(self, guid, book=None):
         from enapi import EnNote
         if book:
             return self.notebook(book).get_note(guid)
         else:
             filter = self.note_store.NoteFilter(guid=guid)
             spec = self.note_store.NotesMetadataResultSpec(includeTitle=True,
-                                                                includeContentLength=True,
-                                                                includeCreated=True,
-                                                                includeUpdated=True,
-                                                                includeDeleted=True,
-                                                                includeTagGuids=True,
-                                                                includeAttributes=True)
+                                                           includeContentLength=True,
+                                                           includeCreated=True,
+                                                           includeUpdated=True,
+                                                           includeDeleted=True,
+                                                           includeTagGuids=True,
+                                                           includeAttributes=True)
 
             nmds = self.note_store.findNotesMetadata(filter, 0, 1, spec).notes
             nmd = EnNote.initialize(nmds[0])
             return nmd
 
-    def delete_note(self,guid):
-        self.note_store.deleteNote(guid)
+    def delete_note(self, note):
+        self.note_store.deleteNote(note.guid)
+
+    def create_note(self, note, book=None):
+        from enapi import EnNote
+        if book:
+            note.notebookGuid = self.notebook(book).guid
+        return(EnNote.initialize(self.note_store.createNote(note)))
+
+    def update_note(self, note):
+        note = self.note_store.updateNote(note)
+        return note.updated
 
