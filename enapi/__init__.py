@@ -8,11 +8,14 @@ PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 from .client import EnClient
 from .notes import EnBook, EnNote, EnStack
+from .enml import ENMLOfPlainText, PlainTextOfENML
 
 __all__ = [
 
     'EnClient',
     'EnBook',
     'EnNote',
-    'EnStack'
+    'EnStack',
+    'ENMLOfPlainText',
+    'PlainTextOfENML'
 ]

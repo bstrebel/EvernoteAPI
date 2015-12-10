@@ -7,11 +7,12 @@ from enapi import *
 en = EnClient.get_client()
 print en.user_store.getUser().name
 
-title = "Second note from python"
+title = "Note from python"
 content = EnNote.body("Note body ...")
 note = EnNote(title=title, content=content)
 note = note.create()
-print note.guid
+print note.edit_url
+
 exit(0)
 #note.title = "New note from python"
 #note.content = EnNote.body("Note body ...")

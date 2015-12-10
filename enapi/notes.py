@@ -75,10 +75,15 @@ class EnNote(Types.Note):
 
     @staticmethod
     def body(body):
-        nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-        nBody += "<en-note>%s</en-note>" % body
-        return nBody
+
+        div = ""
+        for line in body.splitlines():
+            div += "<div>" + line + "</div>"
+
+        xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        xml += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+        xml += "<en-note>%s</en-note>" % div
+        return xml
 
     @staticmethod
     def initialize(nmd):
@@ -99,6 +104,15 @@ class EnNote(Types.Note):
         if self._client is None:
             self._client = EnClient.get_client()
         return self._client
+
+    @property
+    def view_url(self):
+        return "http://%s/shard/%s/nl/%s/%s/" % (self.client.service,
+                                                 self.client.user.shardId,
+                                                 self.client.user.id, self.guid)
+    @property
+    def edit_url(self):
+        return "https://%s/Home.action#n=%s" % (self.client.service, self.guid)
 
     def load(self):
         note = self.client.note_store.getNote(self.guid, True, True, True, True)

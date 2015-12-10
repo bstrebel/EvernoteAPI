@@ -27,9 +27,23 @@ class EnClient(EvernoteClient):
         self._note_store = None
         self._notebooks = None
         self._stacks = None
+        self._user = None
         self._guids = None
 
         EnClient.set_client(self)
+
+    @property
+    def service(self):
+        if self.sandbox:
+            return 'sandbox.evernote.com'
+        else:
+            return 'www.evernote.com'
+
+    @property
+    def user_id(self):
+        #return self._user_store.userId()
+        pass
+
 
     def __initialize(self):
         from enapi import EnBook
@@ -47,6 +61,12 @@ class EnClient(EvernoteClient):
         if self._user_store is None:
             self._user_store = EvernoteClient.get_user_store(self)
         return self._user_store
+
+    @property
+    def user(self):
+        if self._user is None:
+            self._user = self.user_store.getUser()
+        return self._user
 
     @property
     def note_store(self):
@@ -84,7 +104,9 @@ class EnClient(EvernoteClient):
             return nmd
 
     def delete_note(self, note):
-        self.note_store.deleteNote(note.guid)
+        if not isinstance(note, str):
+            note = note.guid
+        self.note_store.deleteNote(note)
 
     def create_note(self, note, book=None):
         from enapi import EnNote
@@ -94,5 +116,5 @@ class EnClient(EvernoteClient):
 
     def update_note(self, note):
         note = self.note_store.updateNote(note)
-        return note.updated
+        return note
 
