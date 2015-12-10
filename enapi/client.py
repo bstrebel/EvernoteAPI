@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os,sys,json,requests
+import os, sys, json, requests, logging
 
 from evernote.api.client import EvernoteClient
 
@@ -10,10 +10,11 @@ class EnClient(EvernoteClient):
     _client = None
 
     @staticmethod
-    def get_client(token=None):
+    def get_client(token=None, logger=None):
         if not EnClient._client:
-            if not token: token = token = os.environ.get('EVERNOTE_TOKEN')
-            EnClient._client = EnClient(token=token, sandbox=False)
+            if not token: token = os.environ.get('EVERNOTE_TOKEN')
+            if not logger: logger = logging.getLogger('enapi')
+            EnClient._client = EnClient(token=token, sandbox=False, logger=logger)
         return EnClient._client
 
     @staticmethod
@@ -29,8 +30,12 @@ class EnClient(EvernoteClient):
         self._stacks = None
         self._user = None
         self._guids = None
+        self._logger = kwargs.get('logger')
 
         EnClient.set_client(self)
+
+    @property
+    def logger(self): return self._logger
 
     @property
     def service(self):

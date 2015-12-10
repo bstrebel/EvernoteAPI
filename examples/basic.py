@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os,sys,json,requests
+import os,sys,json,requests,logging
 
 from enapi import *
 
-en = EnClient.get_client()
+logger = logging.getLogger('BASIC')
+
+en = EnClient.get_client(logger=logger)
+
+exit(0)
+
 print en.user_store.getUser().name
 
 title = "Note from python"

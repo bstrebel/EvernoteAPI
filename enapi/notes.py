@@ -7,7 +7,6 @@ from evernote.edam.notestore import NoteStore
 import evernote.edam.type.ttypes as Types
 from enapi import *
 
-
 class EnBook(Types.Notebook):
 
     @staticmethod
@@ -110,9 +109,24 @@ class EnNote(Types.Note):
         return "http://%s/shard/%s/nl/%s/%s/" % (self.client.service,
                                                  self.client.user.shardId,
                                                  self.client.user.id, self.guid)
+
     @property
     def edit_url(self):
         return "https://%s/Home.action#n=%s" % (self.client.service, self.guid)
+
+    @property
+    def plain(self):
+        from enapi import PlainTextOfENML
+        if self.content is not None:
+            return PlainTextOfENML(self.content)
+
+    @property
+    def html(self):
+        if self.content is not None:
+            return
+
+
+
 
     def load(self):
         note = self.client.note_store.getNote(self.guid, True, True, True, True)
