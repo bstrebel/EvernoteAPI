@@ -122,11 +122,9 @@ class EnNote(Types.Note):
 
     @property
     def html(self):
+        from enapi import HTMLOfENML
         if self.content is not None:
-            return
-
-
-
+            return HTMLOfENML(self.content)
 
     def load(self):
         note = self.client.note_store.getNote(self.guid, True, True, True, True)
