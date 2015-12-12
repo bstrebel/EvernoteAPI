@@ -117,9 +117,10 @@ class EnClient(EvernoteClient):
         from enapi import EnNote
         if book:
             note.notebookGuid = self.notebook(book).guid
-        return(EnNote.initialize(self.note_store.createNote(note)))
+
+        return(EnNote.initialize(self.note_store.createNote(note.encoded)))
 
     def update_note(self, note):
-        note = self.note_store.updateNote(note)
+        note = self.note_store.updateNote(note.encoded)
         return note
 

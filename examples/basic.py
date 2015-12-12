@@ -8,12 +8,17 @@ logger = logging.getLogger('BASIC')
 
 en = EnClient.get_client(logger=logger)
 
-exit(0)
+#exit(0)
 
-print en.user_store.getUser().name
+#print en.user_store.getUser().name
 
-title = "Note from python"
-content = EnNote.body("Note body ...")
+title = u"Note 4 from python {ÄÖÜ}"
+content = title
+
+#if isinstance(title, unicode):
+#    title = title.encode('utf-8')
+
+content = EnNote.body(title)
 note = EnNote(title=title, content=content)
 note = note.create()
 print note.edit_url

@@ -123,8 +123,18 @@ class EnNote(Types.Note):
     @property
     def html(self):
         from enapi import HTMLOfENML
-        if self.content is not None:
-            return HTMLOfENML(self.content)
+        # if self.content is not None:
+        #     return HTMLOfENML(self.content)
+        return self.content
+
+    @property
+    def encoded(self):
+        if isinstance(self.title, unicode):
+            self.title = self.title.encode('utf-8')
+
+        if isinstance(self.content, unicode):
+            self.content = self.content.encode('utf-8')
+        return self
 
     def load(self):
         note = self.client.note_store.getNote(self.guid, True, True, True, True)
@@ -135,7 +145,10 @@ class EnNote(Types.Note):
         self.client.delete_note(self.guid)
 
     def create(self):
-        return(EnNote.initialize(self.client.note_store.createNote(self)))
+        return(EnNote.initialize(self.client.note_store.createNote(self.encoded)))
+
+    def update(self):
+        return(EnNote.initialize(self.client.note_store.updateNote(self.encoded)))
 
     def get_note(self):
         return self.client.note_store.getNote(self.guid, True, True, True, True)
