@@ -32,8 +32,10 @@ class EnBook(Types.Notebook):
                                                             includeTagGuids=True,
                                                             includeAttributes=True)
         self._notes = None
+        self._tags = None
         self._index = 0
         self._offset = 0
+        self.logger.debug('Notebook [%s] %s' % (self.guid, self.name.decode('utf-8')))
 
     @property
     def notes(self):
@@ -45,16 +47,36 @@ class EnBook(Types.Notebook):
         return self._notes
 
     @property
+    def tags(self):
+        if self._tags is None:
+            self._tags = {}
+            for tag in self._client.note_store.listTagsByNotebook(self.guid):
+                self._tags[tag.guid] = tag.name
+        return self._tags
+
+    @property
     def client(self):
         if self._client is None:
             self._client = EnClient.get_client()
         return self._client
+
+    @property
+    def logger(self): return self.client.logger
 
     def __getitem__(self, guid):
         return self.notes.get(guid)
 
     def __iter__(self):
         return iter(self.notes)
+
+    def get_tag(self, guid):
+        return self.tags.get(guid)
+
+    def get_tag_by_name(self, name):
+        for k,v in self.tags.items():
+            if v == name:
+                return k
+        return None
 
     def get_note(self, guid):
         return self.notes.get(guid)
@@ -93,16 +115,29 @@ class EnNote(Types.Note):
     def __init__(self, **kwargs):
         Types.Note.__init__(self, **kwargs)
         self._client = None
+        self._book = None
         self.__initialize()
 
     def __initialize(self):
         self._client = EnClient.get_client()
+        self._book = None
+        #self.logger.debug('Note [%s] %s' % (self.guid, self.title.decode('utf-8')))
+        self.logger.debug('Note [%s] %s' % (self.guid, self.title))
 
     @property
     def client(self):
         if self._client is None:
             self._client = EnClient.get_client()
         return self._client
+
+    @property
+    def book(self):
+        if self._book is None:
+            self._book = self.client.notebook(self.notebookGuid)
+        return self._book
+
+    @property
+    def logger(self): return self.client.logger
 
     @property
     def view_url(self):
@@ -128,6 +163,35 @@ class EnNote(Types.Note):
         return self.content
 
     @property
+    def categories(self):
+        """
+        :return: comma separated list of unicode tags
+        """
+        if self.tagGuids:
+            return ','.join(map(lambda guid: self.book.get_tag(guid).decode('utf-8'), self.tagGuids))
+
+    @property
+    def tags(self):
+        """
+        :return: array of tag names
+        """
+        names = []
+
+        if self.tagGuids:
+            for guid in self.tagGuids:
+                name = self.book.get_tag(guid)
+                names.append(name)
+
+        return names
+
+    def html_content(self, url=None):
+        if url:
+            if self.attributes.sourceURL:
+                if not self.attributes.sourceURL.startswith(url):
+                    return True
+        return False
+
+    @property
     def encoded(self):
         if isinstance(self.title, unicode):
             self.title = self.title.encode('utf-8')
@@ -136,10 +200,21 @@ class EnNote(Types.Note):
             self.content = self.content.encode('utf-8')
         return self
 
-    def load(self):
-        note = self.client.note_store.getNote(self.guid, True, True, True, True)
-        self = EnNote.initialize(note)
-        return self
+    def load(self, maxsize=None, resource=False, recognition=False, alternate=False):
+        content = True
+        if maxsize:
+            if self.contentLength and self.contentLength > maxsize:
+                content = False
+                message = "Note content exceeds limit of %d KB" % (maxsize/1024)
+        try:
+            note = self.client.note_store.getNote(self.guid, content, resource, recognition, alternate)
+            self = EnNote.initialize(note)
+            if not content and not self.content:
+                self.content = message
+            return self
+        except Exception, e:
+            self.logger.exception(e)
+            return None
 
     def delete(self):
         self.client.delete_note(self.guid)
@@ -150,8 +225,8 @@ class EnNote(Types.Note):
     def update(self):
         return(EnNote.initialize(self.client.note_store.updateNote(self.encoded)))
 
-    def get_note(self):
-        return self.client.note_store.getNote(self.guid, True, True, True, True)
+    def get_note(self, content=False, resource=False, recognition=False, alternate=False):
+        return self.client.note_store.getNote(self.guid, content, resource, recognition, alternate)
 
     # def __getitem__(self, key):
     #     # return note attributes
@@ -160,6 +235,8 @@ class EnNote(Types.Note):
     # def __getattr__(self, key):
     #     # return note attributes
     #     pass
+
+
 
 class EnStack():
 
