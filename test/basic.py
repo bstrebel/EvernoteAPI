@@ -4,7 +4,10 @@ import os,sys,json,requests,logging
 
 from enapi import *
 
-logger = logging.getLogger('BASIC')
+from pyutils import ConsoleLogger, LogAdapter
+
+logger = ConsoleLogger('BASIC')
+logger.info("Logging initialized ...")
 en = EnClient.get_client(logger=logger)
 
 book = en.notebook('OxSync')
