@@ -147,7 +147,7 @@ class EnNote(Types.Note):
 
     @property
     def edit_url(self):
-        return "https://%s/Home.action#n=%s" % (self.client.service, self.guid)
+        return "https://%s/Home.action#n=%s&b=%s&ses=4&sh=1&sds=5&" % (self.client.service, self.guid, self.notebookGuid)
 
     @property
     def plain(self):
