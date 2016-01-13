@@ -97,13 +97,17 @@ class EnClient(EvernoteClient):
 
     def notebook(self, name):
 
-        if not self._notebooks:
-            self.__initialize()
+        if name is not None:
 
-        if re.match('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', name):
-            return self._books.get(name)
+            if not self._notebooks:
+                self.__initialize()
 
-        return self._notebooks.get(name)
+            if re.match('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', name):
+                return self._books.get(name)
+
+            return self._notebooks.get(name)
+
+        return None
 
     def get_note(self, guid, book=None):
         from enapi import EnNote
@@ -136,9 +140,10 @@ class EnClient(EvernoteClient):
         return(EnNote.initialize(self.note_store.createNote(note.encoded)))
 
     def update_note(self, note):
+        from enapi import EnNote
         try:
             note = self.note_store.updateNote(note.encoded)
-            return note
+            return EnNote.initialize(note)
         except Exception, e:
             self.logger.exception(e)
             return None
