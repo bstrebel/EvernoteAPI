@@ -79,7 +79,9 @@ class EnBook(Types.Notebook):
         return None
 
     def get_note(self, guid):
-        return self.notes.get(guid)
+        note = self.notes.get(guid)
+        note._book = self
+        return note
 
     def create_note(self, note):
         note.notebookGuid = self.guid
@@ -121,8 +123,45 @@ class EnNote(Types.Note):
     def __initialize(self):
         self._client = EnClient.get_client()
         self._book = None
-        #self.logger.debug('Note [%s] %s' % (self.guid, self.title.decode('utf-8')))
-        self.logger.debug('Note [%s] %s' % (self.guid, self.title))
+        self._properties = None
+        self._tags = None
+        self.logger.debug('Note [%s] %s' % (self.guid, self.title.decode('utf-8')))
+        #self.logger.debug('Note [%s] %s' % (self.guid, self.title))
+
+    def properties(self):
+        if self._properties is None:
+            self._properties = []
+            for k,v in self.__class__.__dict__.iteritems():
+                if isinstance(v, property):
+                    self._properties.append(k)
+        return self._properties
+
+    def __getitem__(self, key):
+        if key in self.__dict__:
+            # index[] based access non-property values
+            return self.__dict__.get(key)
+        # index[] based access to @property
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        if key in self.properties():
+            # works only if @key.setter is defined !!!
+            setattr(self, key, value)
+        else:
+            # non-property attributes
+            self.__dict__[key] = value
+
+    # def __getattr__(self, key):
+    #     # return note attributes
+    #     pass
+
+    # @property
+    # def title(self):
+    #     return self.__dict__['title'].decode('utf-8')
+    #
+    # @title.setter
+    # def title(self, value):
+    #     self.__dict__['title'] = value
 
     @property
     def client(self):
@@ -169,6 +208,8 @@ class EnNote(Types.Note):
         """
         if self.tagGuids:
             return ','.join(map(lambda guid: self.book.get_tag(guid).decode('utf-8'), self.tagGuids))
+        else:
+            return ''
 
     @property
     def tags(self):
@@ -177,12 +218,17 @@ class EnNote(Types.Note):
         """
         names = []
 
-        if self.tagGuids:
-            for guid in self.tagGuids:
-                name = self.book.get_tag(guid)
-                names.append(name)
+        if self.book is not None:
+            if self.tagGuids:
+                for guid in self.tagGuids:
+                    name = self.book.get_tag(guid).decode('utf-8')
+                    names.append(name)
 
         return names
+
+    @tags.setter
+    def tags(self, value):
+        self._tags = value
 
     def html_content(self, url=None):
         if url:
@@ -227,15 +273,6 @@ class EnNote(Types.Note):
 
     def get_note(self, content=False, resource=False, recognition=False, alternate=False):
         return self.client.note_store.getNote(self.guid, content, resource, recognition, alternate)
-
-    # def __getitem__(self, key):
-    #     # return note attributes
-    #     pass
-    #
-    # def __getattr__(self, key):
-    #     # return note attributes
-    #     pass
-
 
 
 class EnStack():
