@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os,sys,json,requests,logging
 
-from enapi import *
-
+import os, sys, logging
 from pyutils import get_logger, LogAdapter
+from enapi import *
 
 logger = get_logger('BASIC', logging.DEBUG)
 logger.info("Logging initialized ...")
 en = EnClient.get_client(logger=logger)
 
 book = en.notebook('OxSync')
+exit(0)
+
 
 # for key in book:
 #     note = book.get_note(key).load()

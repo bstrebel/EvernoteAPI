@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os, sys, json, re, requests, logging
+import os, sys, json, re, logging
 from pyutils import LogAdapter
-
 from evernote.api.client import EvernoteClient
 
 class EnClient(EvernoteClient):

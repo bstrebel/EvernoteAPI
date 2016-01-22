@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os,sys,json,requests
 
-from evernote.api.client import EvernoteClient
 from evernote.edam.notestore import NoteStore
 import evernote.edam.type.ttypes as Types
 from enapi import *
