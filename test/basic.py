@@ -4,9 +4,9 @@ import os,sys,json,requests,logging
 
 from enapi import *
 
-from pyutils import ConsoleLogger, LogAdapter
+from pyutils import get_logger, LogAdapter
 
-logger = ConsoleLogger('BASIC')
+logger = get_logger('BASIC', logging.DEBUG)
 logger.info("Logging initialized ...")
 en = EnClient.get_client(logger=logger)
 
@@ -41,11 +41,21 @@ book = en.notebook('OxSync')
 #note = EnNote(notebookGuid=book.guid, title=title, content=content, tagNames=decoded)
 #note = note.create()
 
-guid = '5e60c1f2-f42f-4fcf-9b4f-d07de94a2b08'
+guid = '25631e18-e2c4-4fcb-8c6a-fdc0e125af35'
 note = en.get_note(guid,'OxSync')
+props = note.properties()
 note = note.load()
 
-tags = note.tags
+title = note['title']
+note['title'] = 'NEW'
+
+#tags = note.tags
+tags = note['tags']
+tags.append('newtag')
+note['tags'] = tags
+
+
+
 note.tagGuids = []
 
 note.tagNames = tags + ['.New2', '.New3']

@@ -180,7 +180,7 @@ class EnNote(Types.Note):
 
     @property
     def view_url(self):
-        return "http://%s/shard/%s/nl/%s/%s/" % (self.client.service,
+        return "https://%s/shard/%s/nl/%s/%s/" % (self.client.service,
                                                  self.client.user.shardId,
                                                  self.client.user.id, self.guid)
 
