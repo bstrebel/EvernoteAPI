@@ -4,6 +4,7 @@
 from evernote.edam.notestore import NoteStore
 import evernote.edam.type.ttypes as Types
 from enapi import *
+from pyutils import utf8, string
 
 class EnBook(Types.Notebook):
 
@@ -33,7 +34,7 @@ class EnBook(Types.Notebook):
         self._tags = None
         self._index = 0
         self._offset = 0
-        self.logger.debug('Notebook [%s] %s' % (self.guid, self.name.decode('utf-8')))
+        self.logger.debug(u'Notebook [%s] %s' % (self.guid, utf8(self.name)))
 
     @property
     def notes(self):
@@ -123,8 +124,7 @@ class EnNote(Types.Note):
         self._book = None
         self._properties = None
         self._tags = None
-        self.logger.debug('Note [%s] %s' % (self.guid, self.title.decode('utf-8')))
-        #self.logger.debug('Note [%s] %s' % (self.guid, self.title))
+        self.logger.debug(u'Note [%s] %s' % (self.guid, utf8(self.title)))
 
     def properties(self):
         if self._properties is None:
@@ -205,7 +205,7 @@ class EnNote(Types.Note):
         :return: comma separated list of unicode tags
         """
         if self.tagGuids:
-            return ','.join(map(lambda guid: self.book.get_tag(guid).decode('utf-8'), self.tagGuids))
+            return ','.join(map(lambda guid: utf8(self.book.get_tag(guid)), self.tagGuids))
         else:
             return ''
 
@@ -219,7 +219,7 @@ class EnNote(Types.Note):
         if self.book is not None:
             if self.tagGuids:
                 for guid in self.tagGuids:
-                    name = self.book.get_tag(guid).decode('utf-8')
+                    name = utf8(self.book.get_tag(guid))
                     names.append(name)
 
         return names
@@ -238,10 +238,10 @@ class EnNote(Types.Note):
     @property
     def encoded(self):
         if isinstance(self.title, unicode):
-            self.title = self.title.encode('utf-8')
+            self.title = string(self.title)
 
         if isinstance(self.content, unicode):
-            self.content = self.content.encode('utf-8')
+            self.content = string(self.content)
         return self
 
     def load(self, maxsize=None, resource=False, recognition=False, alternate=False):

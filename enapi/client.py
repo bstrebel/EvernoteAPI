@@ -36,7 +36,7 @@ class EnClient(EvernoteClient):
         else: self._logger = kwargs.get('logger')
         self._adapter = LogAdapter(self._logger, {'package': 'enapi'})
 
-        self.logger.debug("Evernote client initialized")
+        self.logger.debug(u'Evernote client initialized')
         EnClient.set_client(self)
 
     @property
